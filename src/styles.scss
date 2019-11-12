@@ -31,17 +31,17 @@ $email-font-size: 15px;
   }
 
   &email-block {
-    border: 1px solid #e0ecff;
     background: #e0ecff;
     border-radius: 15px;
-    padding: 3px 8px;
+    padding: 4px 10px;
     margin-left: 5px;
     margin-top: 5px;
     font-size: $email-font-size;
     font-weight: 300;
 
     &--invalid {
-      border-color: red;
+      text-decoration: underline;
+      text-decoration-color: red;
     }
   }
 

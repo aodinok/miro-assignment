@@ -2,6 +2,7 @@ import { INPUT_PLACEHOLDER } from './strings'
 import { setClass } from './utils/dom'
 
 import './styles.scss'
+import { isValidEmail } from './utils/validation'
 
 interface Props {
   container: Element
@@ -55,24 +56,30 @@ export default class EmailsEditor {
     input.setAttribute('placeholder', INPUT_PLACEHOLDER)
     input.addEventListener('blur', this.handleInputBlur)
     input.addEventListener('keydown', this.handleInputKeyDown)
+    input.addEventListener('paste', this.handleInputPaste)
     return input
   }
 
   private createEmailBlock = (email: string): HTMLSpanElement => {
     const emailBlock = document.createElement('span')
     setClass(emailBlock, 'email-block')
+    if (!isValidEmail(email)) {
+      setClass(emailBlock, 'email-block--invalid')
+    }
     emailBlock.textContent = email
     emailBlock.setAttribute('data-key', email)
+    const removeLink = this.createRemoveLink(email)
+    emailBlock.appendChild(removeLink)
+    return emailBlock
+  }
 
-    // add remove link
+  private createRemoveLink = (email: string): HTMLAnchorElement => {
     const removeLink = document.createElement('a')
     removeLink.innerHTML = '&times;'
     removeLink.setAttribute('href', '#')
     removeLink.addEventListener('click', this.handleEmailRemove.bind(this, email))
     setClass(removeLink, 'email-remove')
-    emailBlock.appendChild(removeLink)
-
-    return emailBlock
+    return removeLink
   }
 
   /**
@@ -93,11 +100,29 @@ export default class EmailsEditor {
     }
   }
 
+  private handleInputPaste = (e: ClipboardEvent) => {
+    e.preventDefault()
+    const emails = e.clipboardData && e.clipboardData.getData('text')
+    if (emails) {
+      emails
+        .split(',')
+        .map(email => email.trim())
+        .forEach(email => {
+          this.addEmailBlock(email)
+        })
+    }
+  }
+
   private handleInputKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       this.handleInputBlur()
     }
-    if (e.key === 'Backspace' && this.container.childNodes.length > 1) {
+    if (
+      e.key === 'Backspace' &&
+      this.input &&
+      !this.input.value &&
+      this.container.childNodes.length > 1
+    ) {
       this.container.removeChild(this.container.childNodes[this.container.childNodes.length - 2])
     }
   }
