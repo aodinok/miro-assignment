@@ -1,0 +1,65 @@
+<head>
+  <style>
+    .miro-form {
+      font-family: "Helvetica"; /* "Open Sans"; Requirements say OpenSans, but it's so ugly( */
+      min-width: 564px;
+      box-shadow: 0px 10px 15px -4px rgba(148,148,148,1);
+      border-radius: 10px;
+      border: 1px solid #cbcbcb;
+      overflow: hidden;
+    }
+    .miro-form-content {
+      padding: 30px 50px;
+      background-color: #f8f8f8;
+    }
+    .miro-email-editor {
+      min-height: 100px;
+    }
+    .miro-form-footer {
+      padding: 30px 50px;
+    }
+    .miro-form-title {
+      font-size: 20px;
+    }
+    .miro-board-name {
+      font-weight: 800;
+    }
+    .miro-form-button {
+      background-color: #4262FF;
+      padding: 15px;
+      color: #f8f8f8;
+      border-radius: 10px;
+      border: none;
+      font-size: 15px;
+      font-weight: 300;
+      margin-right: 15px;
+    }
+    .miro-form-button:focus {
+      outline: none;
+      box-shadow: 0 0 0 2pt #b6d2fe;
+    }
+  </style>
+</head>
+<body>
+  <h1>Frontend home assignment</h1>
+  <div class="miro-form">
+    <div class="miro-form-content">
+      <p class="miro-form-title">
+        Share <span class="miro-board-name">Board name</span> with others
+      </p>
+      <div class="miro-email-editor" id="emails-editor"></div>
+    </div>
+    <div class="miro-form-footer">
+      <button class="miro-form-button">Add email</button>
+      <button class="miro-form-button">Get emails count</button>
+    </div>
+  </div>
+</body>
+
+<script src="../dist/emails-editor.umd.js"></script>
+<script>
+const container = document.querySelector('#emails-editor')
+const options = {}
+const editor = new EmailsEditor({container, ...options})
+// some code to control emails via library
+</script>
