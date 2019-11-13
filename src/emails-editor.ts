@@ -6,9 +6,11 @@ import { isValidEmail } from './utils/validation'
 
 interface Props {
   container: Element
+  onChange?: (emailsList: string[]) => void
 }
 
 export default class EmailsEditor {
+  private props: Props
   private container: Element
   private input: HTMLInputElement | null = null
 
@@ -25,25 +27,108 @@ export default class EmailsEditor {
     if (props.container.hasChildNodes()) {
       throw new Error('Container DOM element for EmailsEditor should be empty!')
     }
+    this.props = props
     this.container = props.container
-    this.init()
+    setClass(this.container, 'input-container')
+    this.container.addEventListener('click', this.handleContainerClick)
+    this.input = this.createInput()
+    this.container.appendChild(this.input)
   }
 
+  /**
+   * Public API
+   *
+   */
+
+  /**
+   * Add Email item to the list
+   * @param {string} email Email to be added
+   * @param {boolean} silent Pass true if you don't want subscribers to be notified about this change
+   * @memberof EmailsEditor
+   */
+  public addEmailBlock = (email: string, silent?: boolean) => {
+    const existing = this.container.querySelectorAll(`[data-key="${email}"]`)
+    if (existing && existing.length === 0) {
+      const emailBlock = this.createEmailBlock(email)
+      this.container.insertBefore(emailBlock, this.input)
+      !silent && this.emitOnChange()
+    }
+  }
+
+  /**
+   * Remove Email item from the list
+   * @param {string} email Email to be removed
+   * @param {boolean} silent Pass true if you don't want subscribers to be notified about this change
+   * @memberof EmailsEditor
+   */
+  public removeEmailBlock = (email: string, silent?: boolean) => {
+    const result = this.container.querySelectorAll(`[data-key="${email}"]`)
+    if (result && result.length === 1) {
+      this.container.removeChild(result[0])
+      !silent && this.emitOnChange()
+    }
+  }
+
+  /**
+   * Get current email items, please not that result will include not valid emails
+   * @returns {string[]} emails list
+   * @memberof EmailsEditor
+   */
+  public getEmails = (): string[] => {
+    const result = this.container.querySelectorAll('.mee-email-block')
+    if (result && result.length > 0) {
+      return [].slice.call(result).map((e: HTMLSpanElement) => e.getAttribute('data-key') as string)
+    }
+    return []
+  }
+
+  /**
+   * Get current valid email items
+   * @returns {string[]} emails list
+   * @memberof EmailsEditor
+   */
+  public getValidEmails = () => {
+    this.getEmails().filter(isValidEmail)
+    const result = this.container.querySelectorAll(
+      '.mee-email-block:not(.mee-email-block--invalid)'
+    )
+    if (result && result.length > 0) {
+      return [].slice.call(result).map((e: HTMLSpanElement) => e.getAttribute('data-key'))
+    }
+    return []
+  }
+
+  /**
+   * Set current email items, this will replace existing items with new list
+   * @param {string[]} emails emails list
+   * @memberof EmailsEditor
+   */
+  public setEmails = (emails: string[]) => {
+    if (emails && Array.isArray(emails)) {
+      // "silently" clear existing
+      const existingEmails = this.getEmails()
+      existingEmails.map(email => this.removeEmailBlock(email, false))
+      // "silently" set new list
+      emails.map(email => this.addEmailBlock(email, false))
+      // and then notify clients
+      this.emitOnChange()
+    }
+  }
+
+  /**
+   * Destruct EmailsEditor and clean up
+   * @memberof EmailsEditor
+   */
   public destruct() {
     if (this.container) {
       this.container.removeAttribute('class')
       this.container.removeEventListener('click', this.handleContainerClick)
     }
     if (this.input) {
-      this.container.removeChild(this.input)
+      while (this.container.firstChild) {
+        this.container.removeChild(this.container.firstChild)
+      }
     }
-  }
-
-  private init() {
-    setClass(this.container, 'input-container')
-    this.container.addEventListener('click', this.handleContainerClick)
-    this.input = this.createInput()
-    this.container.appendChild(this.input)
   }
 
   /**
@@ -114,7 +199,8 @@ export default class EmailsEditor {
   }
 
   private handleInputKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
       this.handleInputBlur()
     }
     if (
@@ -132,23 +218,9 @@ export default class EmailsEditor {
     this.removeEmailBlock(email)
   }
 
-  /**
-   * DOM mutations
-   *
-   */
-
-  private addEmailBlock = (email: string) => {
-    const existing = this.container.querySelectorAll(`[data-key="${email}"]`)
-    if (existing && existing.length === 0) {
-      const emailBlock = this.createEmailBlock(email)
-      this.container.insertBefore(emailBlock, this.input)
-    }
-  }
-
-  private removeEmailBlock = (email: string) => {
-    const result = this.container.querySelectorAll(`[data-key="${email}"]`)
-    if (result && result.length === 1) {
-      this.container.removeChild(result[0])
+  private emitOnChange = () => {
+    if (this.props.onChange) {
+      this.props.onChange(this.getEmails())
     }
   }
 }

@@ -14,6 +14,7 @@
     }
     .miro-email-editor {
       min-height: 100px;
+      max-height: 300px;
     }
     .miro-form-footer {
       padding: 30px 50px;
@@ -50,16 +51,28 @@
       <div class="miro-email-editor" id="emails-editor"></div>
     </div>
     <div class="miro-form-footer">
-      <button class="miro-form-button">Add email</button>
-      <button class="miro-form-button">Get emails count</button>
+      <button class="miro-form-button" onclick="addRandomEmail()">Add email</button>
+      <button class="miro-form-button" onclick="alertEmailsCount()">Get emails count</button>
     </div>
   </div>
 </body>
 
 <script src="../dist/emails-editor.umd.js"></script>
 <script>
-const container = document.querySelector('#emails-editor')
-const options = {}
-const editor = new EmailsEditor({container, ...options})
-// some code to control emails via library
+  const container = document.querySelector('#emails-editor')
+  const options = {
+    onChange: (emails) => console.log('emails list changed', emails)
+  }
+  const editor = new EmailsEditor({container, ...options})
+
+  // some code to control emails via library
+  function addRandomEmail () {
+    const randomEmail = Math.random().toString(36).substring(2, 15) + '@gmail.com'
+    editor.addEmailBlock(randomEmail)
+  }
+
+  function alertEmailsCount () {
+    const validEmails = editor.getValidEmails()
+    alert(validEmails.length)
+  }
 </script>
