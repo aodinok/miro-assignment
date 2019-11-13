@@ -28,7 +28,9 @@
     "test:prod": "npm run lint && npm run test -- --no-cache",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
     "commit": "git-cz",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "example": "open-cli ./example/index.html",
+    "docs": "open-cli ./docs/index.html"
   },
   "lint-staged": {
     "{src,test}/**/*.ts": [
@@ -45,7 +47,7 @@
     "transform": {
       ".(ts|tsx)": "ts-jest"
     },
-    "testEnvironment": "node",
+    "testEnvironment": "jsdom",
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
     "moduleFileExtensions": [
       "ts",
@@ -58,15 +60,18 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 90,
-        "functions": 95,
-        "lines": 95,
-        "statements": 95
+        "branches": 40,
+        "functions": 50,
+        "lines": 70,
+        "statements": 75
       }
     },
     "collectCoverageFrom": [
       "src/*.{js,ts}"
-    ]
+    ],
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    }
   },
   "prettier": {
     "semi": false,
@@ -88,10 +93,12 @@
     "cross-env": "^6.0.3",
     "cz-conventional-changelog": "^3.0.2",
     "husky": "^3.0.9",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^24.9.0",
     "jest-config": "^25.0.0",
     "lint-staged": "^9.4.2",
     "node-sass": "^4.13.0",
+    "open-cli": "^5.0.0",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.0",
     "rollup": "^1.26.5",
